@@ -1,0 +1,68 @@
+dataset:
+  name_a: Cityscapes_gray
+  name_b: DDD17_events
+  DDD17_events:
+    dataset_path: data/ddd17_seg/data
+    split_train: train
+    shape:
+    - 200
+    - 346
+    nr_events_data: 20
+    nr_events_files_per_data: None
+    fixed_duration: false
+    delta_t_per_data: 50
+    require_paired_data_train: true
+    require_paired_data_val: true
+    nr_events_window: 32000
+    event_representation: voxel_grid
+    nr_temporal_bins: 5
+    separate_pol: false
+    normalize_event: false
+    pseudolabels_path_b: data/ddd17_pseudolabels/clipseg/train
+    use_pseudolabels_train_b: true
+    pseudolabel_ignore_label_b: 255
+  cityscapes_img:
+    dataset_path: data/cityscapes
+    shape:
+    - 200
+    - 352
+    random_crop: true
+    read_two_imgs: false
+    require_paired_data_train: false
+    require_paired_data_val: false
+task:
+  semseg_num_classes: 6
+dir:
+  log: log/ddd17_vlm_pseudolabel_zero_weight_original
+model:
+  model_name: ess
+  skip_connect_encoder: true
+  skip_connect_task: true
+  skip_connect_task_type: concat
+  data_augmentation_train: true
+  train_on_event_labels: false
+optim:
+  batch_size_a: 16
+  batch_size_b: 16
+  lr_front: 1e-5
+  lr_back: 1e-4
+  lr_decay: 1
+  num_epochs: 18
+  val_epoch_step: 1
+  weight_task_loss: 1
+  weight_cycle_pred_loss: 1
+  weight_cycle_emb_loss: 0.01
+  weight_cycle_task_loss: 0.01
+  weight_pseudolabel_loss: 0.0
+  task_loss:
+  - dice
+  - cross_entropy
+checkpoint:
+  save_checkpoint: true
+  resume_training: true
+  load_pretrained_weights: false
+  resume_file: weights/official/DDD17_UDA.pt.pt
+  pretrained_file: ''
+hardware:
+  num_cpu_workers: 8
+  gpu_device: 0

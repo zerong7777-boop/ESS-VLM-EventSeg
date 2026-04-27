@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+
+# Environments and local tooling
+.venv/
+.venv-*/
+venv/
+env/
+.env
+.env.*
+!.env.bootstrap.sh
+
+# Training artifacts
+log/
+logs/
+wandb/
+.wandb/
+checkpoints/
+runs/
+outputs/
+output/
+
+# Data and generated pseudo labels
+data/
+DSEC/
+Cityscapes/
+cityscapes/
+ddd17_seg/
+ddd17_pseudolabels/
+
+# Weights and large model artifacts
+weights/
+*.pt
+*.pth
+*.pth.tar
+*.ckpt
+*.safetensors
+*.onnx
+
+# Caches
+.cache/
+.transfer_cache/
+tmp/
+*.tar
+*.tar.gz
+*.tar.zst
+*.zip
+
+# External repositories
+third_party/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local delivery-only files
+delivery/
+.tmp_delivery_docs_*/
+.codex_backups/

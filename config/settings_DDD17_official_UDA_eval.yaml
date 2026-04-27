@@ -1,0 +1,62 @@
+# Bootstrap note:
+# - This upstream-compatible config still requires both datasets before `train.py` can start:
+#   1. DDD17 under `data/ddd17_seg/data`
+#   2. Cityscapes under `data/cityscapes`
+# - `scripts/bootstrap/verify_ddd17_layout.py` validates only the DDD17 sensor-B side.
+dataset:
+  name_a: 'Cityscapes_gray'
+  name_b: 'DDD17_events'
+  DDD17_events:
+    dataset_path: data/ddd17_seg/data
+    split_train: 'train'
+    shape: [200, 352]
+    nr_events_data: 5
+    fixed_duration: False
+    delta_t_per_data: 50
+    require_paired_data_train: False
+    require_paired_data_val: False
+    nr_events_window: 32000
+    event_representation: 'voxel_grid'
+    nr_temporal_bins: 5
+    separate_pol: False
+    normalize_event: False
+  cityscapes_img:
+    dataset_path: data/cityscapes
+    shape: [200, 352]
+    random_crop: True
+    read_two_imgs: False
+    require_paired_data_train: False
+    require_paired_data_val: False
+task:
+  semseg_num_classes: 6
+dir:
+  log: log/ddd17_bootstrap
+model:
+  model_name: 'ess'
+  skip_connect_encoder: True
+  skip_connect_task: True
+  skip_connect_task_type: 'concat'
+  data_augmentation_train: False
+  train_on_event_labels: True
+optim:
+  batch_size_a: 2
+  batch_size_b: 2
+  lr_front: 5e-4
+  lr_back: 5e-4
+  lr_decay: 1
+  num_epochs: 1
+  val_epoch_step: 1
+  weight_task_loss: 1
+  weight_cycle_pred_loss: 1
+  weight_cycle_emb_loss: 1
+  weight_cycle_task_loss: 1
+  task_loss: ['dice', 'cross_entropy']
+checkpoint:
+  save_checkpoint: True
+  resume_training: False
+  load_pretrained_weights: True
+  resume_file: ''
+  pretrained_file: 'weights/official/DDD17_UDA.pt.pt'
+hardware:
+  num_cpu_workers: 4
+  gpu_device: 0
