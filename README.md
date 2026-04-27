@@ -30,7 +30,11 @@ The project uses a two-stage teacher-to-student design:
 3. Hard pseudo labels provide the primary VLM supervision.
 4. Top-2 Soft distillation keeps the teacher's two most likely classes and their probabilities, so the event model can learn uncertainty instead of only a one-hot answer.
 
-![Top-2 soft explanation](assets/figures/top2_uncertainty_explainer.png)
+### Real Mechanism Visualization
+
+![Real DDD17 Top-2 Soft mechanism visualization](assets/figures/real_mechanism_visualization.png)
+
+The ambiguity heatmap is computed from FC-CLIP top-1/top-2 probability margins (`p1 - p2`), not from attention. Brighter regions indicate pixels where the offline teacher has closer top-1/top-2 alternatives, motivating Top-2 Soft targets instead of one-hot-only pseudo labels.
 
 ## Results on DDD17
 
@@ -44,8 +48,6 @@ The project uses a two-stage teacher-to-student design:
 ![mIoU comparison](assets/figures/miou_comparison.png)
 
 ![Checkpoint curve](assets/figures/checkpoint_curve.png)
-
-![Contribution decomposition](assets/figures/contribution_waterfall.png)
 
 ## Repository Layout
 
@@ -69,18 +71,18 @@ Expected local layout after preparing data and external weights:
 
 ```text
 ESS-VLM-EventSeg/
-├── data/
-│   ├── ddd17_seg/data/
-│   ├── cityscapes/
-│   └── ddd17_pseudolabels/
-│       ├── fcclip_no_filter_cropped/
-│       ├── fcclip_top2_soft_cropped/
-│       └── fcclip_confidence_cropped/
-├── weights/official/DDD17_UDA.pt.pt
-└── third_party/fc-clip/
-    └── checkpoints/
-        ├── fcclip_convnext_large_eval_ade20k.pth
-        └── open_clip_model.safetensors
+|-- data/
+|   |-- ddd17_seg/data/
+|   |-- cityscapes/
+|   `-- ddd17_pseudolabels/
+|       |-- fcclip_no_filter_cropped/
+|       |-- fcclip_top2_soft_cropped/
+|       `-- fcclip_confidence_cropped/
+|-- weights/official/DDD17_UDA.pt.pt
+`-- third_party/fc-clip/
+    `-- checkpoints/
+        |-- fcclip_convnext_large_eval_ade20k.pth
+        `-- open_clip_model.safetensors
 ```
 
 The official ESS DDD17 checkpoint is available from the ESS authors after filling their release form. FC-CLIP and OpenCLIP weights should be downloaded according to the FC-CLIP project instructions or your own experiment record.

@@ -18,7 +18,7 @@ ESS 原方法提供了事件语义分割的基础框架。本项目没有推翻 
 
 FC-CLIP 在大量图像-文本语义知识上训练过，能对图像产生较强的开放词汇语义理解。本项目把它作为教师模型，但不在 ESS 训练过程中实时调用。
 
-具体做法是先对 DDD17 中与事件数据配对的图像帧离线推理，生成像素级语义伪标签。这样训练 ESS 时只需要读取已经生成好的伪标签文件，不会把 FC-CLIP 放进训练主循环。
+具体做法是先对 DDD17 中与事件数据配对的图像帧离线推理，生成像素级语义伪标签。训练 ESS 时只读取已经生成好的伪标签文件，因此不会把 FC-CLIP 放进训练主循环。
 
 ### 2. 硬伪标签监督
 
@@ -43,6 +43,14 @@ Top-2 Soft 蒸馏保留教师预测中概率最高的两个类别及其概率，
 | ESS + FC-CLIP + Top-2 Soft | 56.8124 | 89.5776 | Epoch 15 best validation checkpoint |
 | Top-2 Soft final epoch | 56.1059 | 89.6507 | Epoch 18 final epoch |
 
+## 真实机制可视化图怎么讲
+
+新增的机制图不是注意力热图，而是从真实 FC-CLIP Top-2 伪标签中计算出来的“不确定性/歧义热图”。每个像素都有教师模型给出的第一候选概率 `p1` 和第二候选概率 `p2`。如果 `p1-p2` 很小，说明教师在两个类别之间比较犹豫；图中会把这类区域显示得更亮。
+
+这张图的意义是说明 Top-2 Soft 蒸馏为什么合理：事件学生模型不只学习一个硬类别，还能学习教师在模糊边界、小目标或易混区域上的第二候选信息。图中的 agreement/error overlay 用绿色和红色展示 FC-CLIP 硬伪标签与 DDD17 标签的一致/不一致区域，用来辅助解释监督信号的可靠性。
+
+汇报时需要强调：这不是 attention，也不是模型内部注意力，而是由离线教师的 top-1/top-2 概率差计算出的真实 artifact 可视化。
+
 ## 如何体现工作量
 
 本项目的工作量不只是“调用一个现成模型”。真正需要完成的是把视觉语言模型输出变成事件分割训练可用的监督信号，并在 ESS 的数据流、配置系统、训练器和验证流程中打通。
@@ -54,7 +62,7 @@ Top-2 Soft 蒸馏保留教师预测中概率最高的两个类别及其概率，
 - 实现 FC-CLIP 到 DDD17 类别体系的映射和 dense pseudolabel 导出。
 - 修改 DDD17 event loader，使它能读取 hard pseudolabel、confidence map 和 Top-2 soft label artifact。
 - 修改 ESS trainer，把伪标签 CE 和 Top-2 soft distillation loss 接入训练。
-- 进行多轮失败探索和 ablation，包括 VPR、pixel confidence、不同 Top-2 权重和 checkpoint 选择。
+- 进行多轮探索和 ablation，包括 VPR、pixel confidence、不同 Top-2 权重和 checkpoint 选择。
 - 形成可复现实验记录、配置文件、测试脚本和可视化图。
 
 因此，本项目的创新点更准确地说是“面向事件相机语义分割的 VLM 离线监督适配与轻量蒸馏验证”，而不是重新发明一个大型 backbone。
@@ -70,3 +78,4 @@ Top-2 Soft 蒸馏保留教师预测中概率最高的两个类别及其概率，
 - 不要说 FC-CLIP 在 ESS 训练时在线推理。
 - 不要说该结果是 SOTA。
 - 不要把 `56.8124` 说成 final epoch；它是 Epoch 15 best validation checkpoint。
+- 不要把机制图说成 attention heatmap；它是由 Top-2 概率差计算出的歧义热图。
